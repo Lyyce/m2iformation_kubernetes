@@ -1,0 +1,16 @@
+---
+version: "3"
+services:
+
+  flask:
+    image: ubuntu_flask:1.0.2
+    ports: 
+    - "80-85:80"
+    scale: 1
+
+
+  db:
+    image: mariadb:10.10-rc
+    #restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: example

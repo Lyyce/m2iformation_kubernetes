@@ -1,0 +1,127 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: exo3
+  labels:
+    name: exo3
+
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: scaling-exo3
+  namespace: exo3 
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: deploy-exo3
+  minReplicas: 1
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: deploy-exo3
+  namespace: exo3 
+  label:
+    app: exo3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      target: exo3
+  
+  template:
+    metadata:
+      labels:
+        target: exo3
+    spec: 
+      containers:
+      - name: container-exo3
+        image: ubuntu_flask:1.0.2
+        command: ["/bin/sleep", "3650d"]
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "500m"
+          limits:
+            memory: "256Mi"
+            cpu: "750m"
+        
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: 
+  name: mariadb-pvc
+  namespace: exo3 
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: mariadb-pod
+  namespace: exo3 
+spec:
+  containers:
+  - name: mariadb 
+    image: mariadb:10.10-rc
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+      limits:
+        memory: "256Mi"
+        cpu: "750m"
+    env:
+    - name: MARIADB_ROOT_PASSWORD
+      value: abc_abc
+  volumes:
+  - name: mariadb-volume
+    persistentVolumeClaim:
+      claimName: mariadb-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: exo3-flask-svc
+  namespace: exo3 
+
+
+spec:
+  type: NodePort  # accessible from outside network
+  selector:  
+    target: exo3 
+  ports: 
+  - port: 80
+    targetPort: 80 #port ecouté par le pod ciblé  
+    nodePort: 32700
+    protocol: TCP
+  selector:
+    app: exo3
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: exo3-mariadb-svc
+  namespace: exo3 
+  labels:
+    run: exo3-mariadb
+spec:
+  type: ClusterIP # default option, only accessible from within the cluster
+  selector:
+    run: exo3-mariadb
+  ports:
+  - port: 6379
