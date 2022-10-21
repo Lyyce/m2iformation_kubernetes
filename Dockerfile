@@ -27,10 +27,5 @@ CMD ["python3", "-u", "app.py"]
 
 
 # docker build . -t ubuntu_flask:1.0.2
-# docker tag ubuntu_flask:1.0.0 anthonyrouquier/ubuntu_flask:1.0.0
-# docker push anthonyrouquier/ubuntu_flask:1.0.0
-
-
-# RUN pip install configparser
-# RUN pip install MySQL-python
-# RUN pip install flask-mysql
+# docker tag ubuntu_flask:1.0.0 anthonyrouquier/ubuntu_flask:1.0.2
+# docker push anthonyrouquier/ubuntu_flask:1.0.2
