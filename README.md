@@ -9,12 +9,8 @@ docker compose up
 
 # deploy application in a cluster 
 
-minikube start
-
-kubectl apply -f exo3.yaml
-
-docker run -it --name flask  ubuntu_flask:1.0.2 
-
-or 
-
+minikube start  
+kubectl apply -f exo3.yaml  
+docker run -it --name flask  ubuntu_flask:1.0.2   
+or  
 docker run -d --name flask  ubuntu_flask:1.0.2
