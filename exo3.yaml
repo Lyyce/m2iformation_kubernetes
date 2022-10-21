@@ -1,4 +1,5 @@
 ---
+# creation of the namespace used within the file
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -7,21 +8,23 @@ metadata:
     name: exo3
 
 ---
+# autoscaling for flask deployment
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
   name: scaling-exo3
   namespace: exo3 
 spec:
-  scaleTargetRef:
+  scaleTargetRef:   # which deployment want to scale
     apiVersion: apps/v1
     kind: Deployment
     name: deploy-exo3
-  minReplicas: 1
-  maxReplicas: 8
-  targetCPUUtilizationPercentage: 70
+  minReplicas: 1     # minimum number of replicas to uses
+  maxReplicas: 8     # maximum number of replicas to uses
+  targetCPUUtilizationPercentage: 70  # percentage usage of the CPU over which another replicas is created
 
 ---
+# Flask, we use deployment because it is easily scalable
 apiVersion: apps/v1
 kind: Deployment
 metadata: 
@@ -30,7 +33,7 @@ metadata:
   label:
     app: exo3
 spec:
-  replicas: 1
+  replicas: 1   # single replica for a start, the autoscaling will add more as necessary
   selector:
     matchLabels:
       target: exo3
@@ -42,7 +45,8 @@ spec:
     spec: 
       containers:
       - name: container-exo3
-        image: anthonyrouquier/ubuntu_flask:1.0.2
+        image: anthonyrouquier/ubuntu_flask:1.0.2   # custom image we created for flask
+        # resources limitations
         resources:
           requests:
             memory: "128Mi"
@@ -53,6 +57,7 @@ spec:
         
 
 ---
+# persistent volume to link to mariadb
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata: 
@@ -66,6 +71,7 @@ spec:
       storage: 5Gi
 
 ---
+# mariadb, not looking to scale it so a pod is sufficient
 apiVersion: v1
 kind: Pod
 metadata: 
@@ -74,7 +80,8 @@ metadata:
 spec:
   containers:
   - name: mariadb 
-    image: mariadb:10.10-rc
+    image: mariadb:10.10-rc  # one of the standard image from mariadb repository
+    # resource limitations for mariadb pod
     resources:
       requests:
         memory: "128Mi"
@@ -82,10 +89,10 @@ spec:
       limits:
         memory: "256Mi"
         cpu: "750m"
-    env:
+    env: # we need to specify a password to mariadb
     - name: MARIADB_ROOT_PASSWORD
-      value: abc_abc
-  volumes:
+      value: example
+  volumes:  # link the previously created pvc to the pod
   - name: mariadb-volume
     persistentVolumeClaim:
       claimName: mariadb-pvc
@@ -96,7 +103,6 @@ kind: Service
 metadata:
   name: exo3-flask-svc
   namespace: exo3 
-
 
 spec:
   type: NodePort  # accessible from outside network
