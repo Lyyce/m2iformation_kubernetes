@@ -42,8 +42,7 @@ spec:
     spec: 
       containers:
       - name: container-exo3
-        image: ubuntu_flask:1.0.2
-        command: ["/bin/sleep", "3650d"]
+        image: anthonyrouquier/ubuntu_flask:1.0.2
         resources:
           requests:
             memory: "128Mi"
