@@ -30,9 +30,7 @@ kind: Deployment
 metadata: 
   name: deploy-exo3
   namespace: exo3 
-  label:
-    app: exo3
-spec:
+spec: 
   replicas: 1   # single replica for a start, the autoscaling will add more as necessary
   selector:
     matchLabels:
